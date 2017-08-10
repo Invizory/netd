@@ -10,3 +10,24 @@ func Listen() net.Listener {
 	}
 	return listener
 }
+
+// BrokenListener creates fake net.Listener that returns error on every Accept.
+func BrokenListener(err error) net.Listener {
+	return broken{err}
+}
+
+func (b broken) Accept() (net.Conn, error) {
+	return nil, b.error
+}
+
+func (broken) Addr() net.Addr {
+	return nil
+}
+
+func (broken) Close() error {
+	return nil
+}
+
+type broken struct {
+	error
+}

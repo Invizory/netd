@@ -2,6 +2,7 @@ package basic_test
 
 import (
 	"bytes"
+	"errors"
 	"net"
 	"testing"
 
@@ -25,6 +26,16 @@ func TestPipe(t *testing.T) {
 	server.Serve(netest.Once(backio.Pipe(buffer), listener))
 	if received := buffer.String(); sent != received {
 		t.Error("sent and received strings should match")
+	}
+}
+
+func TestReceiveError(t *testing.T) {
+	expected := errors.New("oops")
+	errors := make(chan error, 1)
+	server := basic.Server(netest.BrokenListener(expected), errors)
+	go server.Serve(backio.Echo())
+	if actual := <-errors; expected != actual {
+		t.Error("expected and actual errors should match")
 	}
 }
 
